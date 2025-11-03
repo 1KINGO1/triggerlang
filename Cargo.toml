@@ -1,0 +1,13 @@
+[package]
+name = "triggerlang"
+version = "0.1.0"
+description = "A parser for trigger-like conditional language similar to Battlemetrics syntax"
+authors = ["Lys Taras t.lys@ukma.edu.ua"]
+edition = "2024"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+pest = "2.8.3"
+pest_derive = "2.8.3"
+thiserror = "2.0.17"
