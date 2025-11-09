@@ -11,3 +11,4 @@ readme = "README.md"
 pest = "2.8.3"
 pest_derive = "2.8.3"
 thiserror = "2.0.17"
+clap = { version = "4.5.51", features = ["derive"] }

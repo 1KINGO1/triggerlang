@@ -1,4 +1,4 @@
-use triggerlang::parse_triggers;
+use triggerlang::{parse_triggers, parse_triggers_to_ast};
 
 #[test]
 fn test_simple_trigger() {
@@ -100,4 +100,93 @@ fn test_invalid_trigger_mising_semicolon() {
     "#;
 
     assert!(parse_triggers(input).is_err());
+}
+
+#[test]
+fn test_empty_input_fails() {
+    assert!(parse_triggers("").is_err());
+}
+
+#[test]
+fn test_whitespace_only_fails() {
+    assert!(parse_triggers(" \n\t     \t   \t     \t ").is_err());
+}
+
+#[test]
+fn test_minimal_fields_trigger() {
+    let input = r#"
+            trigger smallTrigger {
+                on: player_join
+                description: "small"
+                action: test()
+            };
+        "#;
+    assert!(parse_triggers(input).is_ok());
+}
+
+#[test]
+fn test_minimal_fields_trigger_fails() {
+    let input = r#"
+            trigger smallTrigger {
+                description: "small"
+                action: test()
+            };
+        "#;
+    assert!(parse_triggers(input).is_err());
+}
+
+#[test]
+fn test_ast_generation() {
+    let input = r#"
+            trigger TestTrigger {
+                on: player_join
+                description: "Test"
+                condition: x == 1
+                action: test()
+            };
+        "#;
+    let ast = parse_triggers_to_ast(input);
+    assert!(ast.is_ok());
+    let ast = ast.unwrap();
+    assert_eq!(ast.triggers.len(), 1);
+    assert_eq!(ast.triggers[0].name, "TestTrigger");
+}
+
+#[test]
+fn test_not_equal_operator() {
+    let input = r#"
+        trigger NotEqual {
+            on: player_join
+            description: "not equal test"
+            condition: player.score != 100
+            action: test()
+        };
+    "#;
+    assert!(parse_triggers(input).is_ok());
+}
+
+#[test]
+fn test_less_than_operator() {
+    let input = r#"
+        trigger LessThan {
+            on: player_join
+            description: "lt test"
+            condition: player.score < 50
+            action: test()
+        };
+    "#;
+    assert!(parse_triggers(input).is_ok());
+}
+
+#[test]
+fn test_less_or_equal_operator() {
+    let input = r#"
+        trigger LessOrrEqual {
+            on: player_join
+            description: "lte test"
+            condition: player.score <= 20
+            action: test()
+        };
+    "#;
+    assert!(parse_triggers(input).is_ok());
 }
