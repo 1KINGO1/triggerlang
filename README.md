@@ -57,3 +57,48 @@ trigger JoinTrigger {
 };
 ```
 
+### Grammar: 
+```pest
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+file = { SOI ~ WHITESPACE* ~ trigger ~ (WHITESPACE* ~ trigger)* ~ WHITESPACE* ~ EOI }
+
+trigger = { "trigger" ~ ident ~ "{" ~ trigger_body ~ "}" ~ ";" }
+
+trigger_body = {
+    (field_on ~ field_description
+    | field_description ~ field_on)
+    ~ field_condition?
+    ~ field_action*
+}
+
+field_on = { "on" ~ ":" ~ event_type }
+field_description = { "description" ~ ":" ~ string }
+field_condition = { "condition" ~ ":" ~ expr }
+field_action = { "action" ~ ":" ~ func_call }
+
+event_type = { "player_join" | "player_leave" | "player_score_change" | "message_receive" }
+
+expr = { atom ~ ((and | or) ~ expr)* }
+atom = { not* ~ (comparison | func_call | ident | "(" ~ expr ~ ")") }
+comparison = { ident ~ (eq | neq | gte | lte | gt | lt) ~ value }
+
+func_call = { ident ~ "(" ~ (arg_list)? ~ ")" }
+arg_list = { (value | ident) ~ ("," ~ (value | ident))* }
+
+string = { "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" | ".")* }
+eq = { "==" }
+neq = { "!=" }
+gt = { ">" }
+lt = { "<" }
+gte = { ">=" }
+lte = { "<=" }
+not = { "!" }
+and = { "&&" }
+or = { "||" }
+boolean = { "true" | "false" }
+number = { ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+value = { boolean | number | string | ident }
+```
+

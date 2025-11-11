@@ -70,7 +70,7 @@ pub enum Value {
 }
 
 impl std::fmt::Display for TriggerFile {
-    fn fmt(&self, f: &mut std::fmt::Formatter< '_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "TriggerFile {{")?;
         for trigger in &self.triggers {
             writeln!(f, "  {}", trigger)?;
@@ -100,9 +100,9 @@ impl std::fmt::Display for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Expr::And(left, right) => write!(f, "({} AND {})", left, right),
-            Expr::Or(left,right) => write!(f, "({} OR {})", left, right),
+            Expr::Or(left, right) => write!(f, "({} OR {})", left, right),
             Expr::Not(expr) => write!(f, "(NOT {})", expr),
-            Expr::Comparison(comp) => write!(f,"{}", comp),
+            Expr::Comparison(comp) => write!(f, "{}", comp),
             Expr::FuncCall(func) => write!(f, "{}", func),
             Expr::Ident(id) => write!(f, "{}", id),
             Expr::Parenthesized(expr) => write!(f, "({})", expr),
@@ -160,15 +160,12 @@ pub fn parse_triggers_to_ast(input: &str) -> Result<TriggerFile, TriggerParserEr
     let mut triggers = Vec::new();
 
     for pair in pairs {
-        match pair.as_rule() {
-            Rule::file => {
-                for inner_pair in pair.into_inner() {
-                    if inner_pair.as_rule() == Rule::trigger {
-                        triggers.push(parse_trigger(inner_pair)?);
-                    }
+        if pair.as_rule() == Rule::file {
+            for inner_pair in pair.into_inner() {
+                if inner_pair.as_rule() == Rule::trigger {
+                    triggers.push(parse_trigger(inner_pair)?);
                 }
             }
-            _ => {}
         }
     }
 
@@ -201,7 +198,7 @@ fn parse_trigger(pair: Pair<Rule>) -> Result<Trigger, TriggerParserError> {
                             for desc_pair in body_pair.into_inner() {
                                 if desc_pair.as_rule() == Rule::string {
                                     let s = desc_pair.as_str();
-                                    description = s[1..s.len()-1].to_string();
+                                    description = s[1..s.len() - 1].to_string();
                                 }
                             }
                         }
@@ -301,7 +298,7 @@ fn parse_expr_atom(pair: Pair<Rule>) -> Result<Expr, TriggerParserError> {
     Ok(result)
 }
 
-fn parse_comparison(pair: Pair<Rule> ) -> Result<Comparison, TriggerParserError> {
+fn parse_comparison(pair: Pair<Rule>) -> Result<Comparison, TriggerParserError> {
     let mut left = String::new();
     let mut operator = ComparisonOp::Eq;
     let mut right = Value::Boolean(false);
@@ -324,7 +321,11 @@ fn parse_comparison(pair: Pair<Rule> ) -> Result<Comparison, TriggerParserError>
         }
     }
 
-    Ok(Comparison { left, operator, right })
+    Ok(Comparison {
+        left,
+        operator,
+        right,
+    })
 }
 
 fn parse_func_call(pair: Pair<Rule>) -> Result<FuncCall, TriggerParserError> {
@@ -356,19 +357,13 @@ fn parse_value(pair: Pair<Rule>) -> Result<Value, TriggerParserError> {
     let inner = pair.into_inner().next().unwrap();
 
     Ok(match inner.as_rule() {
-        Rule::boolean => {
-            Value::Boolean(inner.as_str() == "true")
-        }
-        Rule::number => {
-            Value::Number(inner.as_str().to_string())
-        }
+        Rule::boolean => Value::Boolean(inner.as_str() == "true"),
+        Rule::number => Value::Number(inner.as_str().to_string()),
         Rule::string => {
             let s = inner.as_str();
-            Value::String(s[1..s.len()-1].to_string())
+            Value::String(s[1..s.len() - 1].to_string())
         }
-        Rule::ident => {
-            Value::Ident(inner.as_str().to_string())
-        }
+        Rule::ident => Value::Ident(inner.as_str().to_string()),
         _ => Value::Boolean(false),
     })
 }

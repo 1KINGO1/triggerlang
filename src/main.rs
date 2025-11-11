@@ -36,7 +36,7 @@ fn main() {
         Commands::Parse { file, ast, verbose } => {
             if verbose {
                 println!("Parsing file...");
-                println!("");
+                println!();
                 println!("File: {}", file.display());
             }
 
@@ -44,7 +44,7 @@ fn main() {
                 Ok(content) => {
                     if verbose {
                         println!("File content was readed successfully");
-                        println!("");
+                        println!();
                     }
 
                     match parse_triggers(&content) {
@@ -55,18 +55,18 @@ fn main() {
                                 Ok(ast_tree) => {
                                     println!("Generated AST");
                                     println!("Found {} triggers", ast_tree.triggers.len());
-                                    println!("");
+                                    println!();
 
                                     if ast {
                                         println!("AST tree");
-                                        println!("");
+                                        println!();
 
                                         for (idx, trigger) in ast_tree.triggers.iter().enumerate() {
                                             println!("Trigger #{}", idx + 1);
                                             println!("- Name: {}", trigger.name);
                                             println!("- Event: {}", trigger.event_type);
                                             println!("- Description: \"{}\"", trigger.description);
-                                            println!("");
+                                            println!();
 
                                             if let Some(condition) = &trigger.condition {
                                                 println!("- Condition:");
@@ -76,17 +76,22 @@ fn main() {
                                             }
 
                                             println!("- Actions ({}):", trigger.actions.len());
-                                            for (i, action) in trigger.actions.iter().enumerate() {
+                                            for action in trigger.actions.iter() {
                                                 println!(" - {}", action);
                                             }
-                                            println!("");
+                                            println!();
                                         }
                                     } else {
                                         println!("Triggers found:");
                                         for (idx, trigger) in ast_tree.triggers.iter().enumerate() {
-                                            println!("  {}. {} ({})", idx + 1, trigger.name, trigger.event_type);
+                                            println!(
+                                                "  {}. {} ({})",
+                                                idx + 1,
+                                                trigger.name,
+                                                trigger.event_type
+                                            );
                                         }
-                                        println!("");
+                                        println!();
                                     }
                                 }
                                 Err(e) => {
@@ -114,7 +119,9 @@ fn main() {
         Commands::Credits => {
             println!("triggerlang v1.0.0");
             println!("======");
-            println!("A parser for custom trigger language. Inspired by Battlemetrics trigger system.");
+            println!(
+                "A parser for custom trigger language. Inspired by Battlemetrics trigger system."
+            );
             println!("======");
             println!("Author: Lys Taras");
             println!("Repository: https://github.com/1KINGO1/triggerlang");
@@ -154,7 +161,10 @@ fn print_condition_tree(expr: &triggerlang::Expr, depth: usize) {
             print_condition_tree(inner, depth + 1);
         }
         triggerlang::Expr::Comparison(comp) => {
-            println!("{} Comparison: {} {} {}", indent, comp.left, comp.operator, comp.right);
+            println!(
+                "{} Comparison: {} {} {}",
+                indent, comp.left, comp.operator, comp.right
+            );
         }
         triggerlang::Expr::FuncCall(func) => {
             println!("{} FuncCall: {}", indent, func);
